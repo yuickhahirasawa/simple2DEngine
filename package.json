@@ -13,6 +13,8 @@
     "fabric": "^2.4.4"
   },
   "devDependencies": {
+    "@types/fabric": "^1.5.47",
+    "html-loader": "^0.5.5",
     "ts-loader": "^5.3.1",
     "typescript": "^3.2.1",
     "webpack": "^4.26.1",

@@ -1,7 +1,12 @@
-import Material from "../classes/Material";
+import Material, {MaterialState} from "../classes/Material";
 
-export default class Ground extends Material {
+export default class Air extends Material {
     constructor() {
-        super(1);
+        super({
+            state: MaterialState.GASEOUS,
+            viscosityK: 1,
+            frictionK: 0.2,
+            color: "blue"
+        });
     }
 }

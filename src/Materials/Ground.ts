@@ -1,7 +1,12 @@
-import Material from "../classes/Material";
+import Material, {MaterialState} from "../classes/Material";
 
 export default class Ground extends Material {
     constructor() {
-        super(0);
+        super({
+            state: MaterialState.SOLID,
+            viscosityK: 1,
+            frictionK: 0.2,
+            color: "brown"
+        });
     }
 }
