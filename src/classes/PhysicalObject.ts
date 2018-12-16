@@ -1,20 +1,21 @@
 import Point from "./Point";
 
-type PhysicalObjectData = {
-    m:number;
+export interface PhysicalObjectData {
     coord:Point;
+    dx:number;
+    dy:number;
+    speedX:number;
+    m:number;
 }
 
-export default class PhysicalObject {
-    private readonly _m:number;
-    public readonly coord:Point;
-
-    get m():number {
-        return this._m;
-    }
-
+export default class PhysicalObject implements PhysicalObjectData {
     constructor(data:PhysicalObjectData) {
-        this._m = data.m;
-        this.coord = data.coord;
+        Object.assign(this, data);
     }
+
+    coord: Point;
+    dx: number;
+    dy: number;
+    speedX: number;
+    m: number;
 }

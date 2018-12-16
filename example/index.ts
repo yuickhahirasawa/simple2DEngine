@@ -5,6 +5,7 @@ import PhysicalObject from "../src/classes/PhysicalObject";
 import PhysicalWorld from "../src/classes/PhysicalWorld";
 import Point from "../src/classes/Point";
 import {fabric} from "fabric";
+import PhysicalObjectFabric from "../src/fabrics/PhysicalObjectFabric";
 
 const levelMatrix = [
     [new Air(), new Air, new Air(), new Air()],
@@ -16,10 +17,10 @@ const levelMatrix = [
 const canvas = new fabric.StaticCanvas("canvas");
 const level1 = new Level(levelMatrix, canvas);
 
-const obj = new PhysicalObject({
-    m: 1,
-    coord: new Point(100, 0)
-})
+const obj = PhysicalObjectFabric({
+    coord: new Point(100, 150),
+    speedX: 20
+});
 
 const world = new PhysicalWorld(level1, canvas);
 

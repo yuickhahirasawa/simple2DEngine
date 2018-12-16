@@ -26,7 +26,7 @@ module.exports = {
     },
     devServer: {
         contentBase: path.join(__dirname, "example"),
-        port: 9000,
+        port: 9090,
         filename: "bundle.js"
     }
 };

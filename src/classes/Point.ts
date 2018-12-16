@@ -1,17 +1,10 @@
 export default class Point {
-    private _x:number;
-    private _y:number;
+    public x:number;
+    public y:number;
 
-    get x():number {
-        return this._x;
-    }
-
-    get y():number {
-        return this._y;
-    }
 
     constructor(x:number, y:number) {
-        this._x = x;
-        this._y = y;
+        this.x = x;
+        this.y = y;
     }
 }
