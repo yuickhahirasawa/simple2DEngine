@@ -48,8 +48,8 @@ export class Level {
             height:number
         }
     } {
-        const i = Math.round(point.y / this._chunkSize);
-        const j = Math.round(point.x / this._chunkSize);
+        const i = Math.trunc(point.y / this._chunkSize);
+        const j = Math.trunc(point.x / this._chunkSize);
 
         return {
             material: this.levelMatrix[i][j],

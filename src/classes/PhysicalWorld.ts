@@ -1,10 +1,7 @@
 import {Level} from "./Level";
 import PhysicalObject from "./PhysicalObject";
 import {fabric} from "fabric";
-import Point from "./Point";
-import Material from "./Material";
-import Air from "../Materials/Air";
-import Ground from "../Materials/Ground";
+import {MaterialState} from "./Material";
 
 export default class PhysicalWorld {
     public readonly level:Level;
@@ -30,8 +27,8 @@ export default class PhysicalWorld {
             left: object.coord.x,
             top: object.coord.y,
             fill: "red",
-            width: 20,
-            height: 20
+            width: object.width,
+            height: object.height
         });
 
         this.physicalObjects.push({
@@ -44,38 +41,39 @@ export default class PhysicalWorld {
     private _recalculateWorld():void {
         this.physicalObjects.forEach(obj => {
             let duration = 100;
-            const materialPoint = new Point(
-                obj.data.dx > 0 ?
-                    obj.data.coord.x + obj.canvasObj.width :
-                    obj.data.coord.x,
-                obj.data.dy > 0 ?
-                    obj.data.coord.y + obj.canvasObj.height :
-                    obj.data.coord.y - obj.canvasObj.height
-            );
-            const materialRect = this.level.getMaterialRect(materialPoint);
+            const nextPoint = obj.data.getNextPoint();
 
-            if (materialRect.material instanceof Air) {
-                obj.data.dy = obj.data.dy ?
-                    obj.data.dy + 9 :
-                    0.1;
+            const materialRect = this.level.getMaterialRect(nextPoint);
 
-                obj.data.coord.x += obj.data.speedX;
-                obj.data.coord.y = obj.data.coord.y + obj.data.dy;
+            /*this._canvas.add(new fabric.Rect({
+                top: nextPoint.y,
+                left: nextPoint.x,
+                fill: "yellow",
+                width: 5,
+                height: 5
+            }));*/
+
+            if (materialRect.material.state === MaterialState.LIQUID) {
+                obj.data.coord.x += obj.data.speedX || obj.data.playerSpeedX;
+                obj.data.coord.y += obj.data.speedY;
             }
 
-            if (materialRect.material instanceof Ground) {
-                obj.data.dy = - (obj.data.dy * 10);
-
-                // obj.data.dy = 0;
-                obj.data.dx = 0;
-                obj.data.speedX = 0;
-
-                const speedY = (materialRect.rect.y - obj.data.coord.y) / 100;
-                duration = ((materialRect.rect.y - obj.canvasObj.height) - obj.data.coord.y) / speedY;
-                obj.data.coord.y = materialRect.rect.y - obj.canvasObj.height;
+            if (materialRect.material.state === MaterialState.GASEOUS) {
+                obj.data.coord.x += obj.data.speedX || obj.data.playerSpeedX;
+                obj.data.coord.y += obj.data.speedY;
             }
 
-            console.log(obj.data.dy);
+            if (materialRect.material.state === MaterialState.SOLID) {
+                if (obj.data.speedY > 0) {
+                    duration = ((materialRect.rect.y - obj.canvasObj.height) - obj.data.coord.y) / obj.data.speedY;
+                    obj.data.coord.y = materialRect.rect.y - obj.canvasObj.height;
+                    obj.data.coord.x += obj.data.speedX * duration;
+                    console.log(((materialRect.rect.y - obj.canvasObj.height) - obj.data.coord.y), duration);
+                    duration = duration < 50 ? 50 : duration;
+                } else {
+                    obj.data.coord.x += obj.data.speedX || obj.data.playerSpeedX;
+                }
+            }
 
             obj.canvasObj.animate('top', obj.data.coord.y, {
                 duration,
@@ -85,6 +83,28 @@ export default class PhysicalWorld {
                 duration,
                 onChange: this._canvas.renderAll.bind(this._canvas)
             });
+
+            if (materialRect.material.state === MaterialState.LIQUID) {
+                obj.data.speedY -=
+                    obj.canvasObj.width * obj.canvasObj.height * materialRect.material.ro + 9;
+
+                obj.data.speedX = obj.data.speedX * materialRect.material.ro;
+            }
+
+            if (materialRect.material.state === MaterialState.GASEOUS) {
+                obj.data.speedY += 9 + obj.data.dy;
+                obj.data.speedX += obj.data.dx;
+            }
+
+            console.log(materialRect.material.state)
+            if (materialRect.material.state === MaterialState.SOLID) {
+                obj.data.speedY = - Math.round(obj.data.speedY * .3);
+
+                if (obj.data.speedY < 0 && Math.abs(obj.data.speedY) < obj.canvasObj.height) {
+                    obj.data.speedY = 0;
+                    obj.data.speedX = 0;
+                }
+            }
         });
     }
 }

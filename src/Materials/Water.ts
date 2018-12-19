@@ -1,12 +1,12 @@
 import Material, {MaterialState} from "../classes/Material";
 
-export default class Ground extends Material {
+export default class Water extends Material {
     constructor() {
         super({
-            state: MaterialState.SOLID,
-            ro: 1,
+            state: MaterialState.LIQUID,
+            ro: 0.1,
             frictionK: 0.2,
-            color: "brown"
+            color: "aqua"
         });
     }
 }

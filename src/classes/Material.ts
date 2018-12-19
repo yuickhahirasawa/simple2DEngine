@@ -6,7 +6,7 @@ export enum MaterialState {
 
 export type MaterialData = {
     state:MaterialState;
-    viscosityK:number;
+    ro:number;
     frictionK:number;
 
     color:string;
@@ -15,7 +15,7 @@ export type MaterialData = {
 
 export default abstract class Material {
     private readonly _state:MaterialState;
-    private readonly _viscosityK:number;
+    private readonly _ro:number;
     private readonly _frictionK:number;
     private readonly _color:string;
 
@@ -23,12 +23,8 @@ export default abstract class Material {
         return this._state;
     }
 
-    get viscosityK():number {
-        return this._viscosityK;
-    }
-
-    get frictionK():number {
-        return this._frictionK;
+    get ro():number {
+        return this._ro;
     }
 
     get color():string {
@@ -37,7 +33,7 @@ export default abstract class Material {
 
     protected constructor(data:MaterialData) {
         this._state = data.state;
-        this._viscosityK = data.viscosityK;
+        this._ro = data.ro;
         this._frictionK = data.frictionK;
         this._color = data.color;
     }
