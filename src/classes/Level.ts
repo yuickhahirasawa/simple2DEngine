@@ -5,6 +5,9 @@ import Point from "./Point";
 export class Level {
     private readonly _canvas:fabric.StaticCanvas;
     private readonly _chunkSize:number;
+    private _levelCanvasObjects:fabric.Rect[] = [];
+
+    private _currentLevelX:number;
 
     get width():number {
         return this.levelMatrix[0].length * this._chunkSize;
@@ -21,6 +24,13 @@ export class Level {
         this._canvas = canvas;
         this.draw();
         this._chunkSize = Math.round(this._canvas.getHeight() / this.levelMatrix.length);
+        this._currentLevelX = 0;
+    }
+
+    scroll(x:number):void {
+        for (let obj of this._levelCanvasObjects) {
+            obj.left += x;
+        }
     }
 
     draw() {
@@ -34,6 +44,7 @@ export class Level {
                     top: i * this._chunkSize
                 });
 
+                this._levelCanvasObjects.push(chunk);
                 this._canvas.add(chunk);
             }
         }

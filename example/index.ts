@@ -11,7 +11,7 @@ import Water from "../src/Materials/Water";
 const levelMatrix = [
     [new Air(), new Air, new Air(), new Air(), new Air(), new Air()],
     [new Air(), new Air, new Air(), new Air(), new Air(), new Air()],
-    [new Water(), new Water, new Water(), new Water(), new Water(), new Water()],
+    // [new Water(), new Water, new Water(), new Water(), new Water(), new Water()],
     [new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Air()]
 ];
 

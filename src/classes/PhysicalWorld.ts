@@ -106,5 +106,28 @@ export default class PhysicalWorld {
                 }
             }
         });
+
+        const playableObject = this.physicalObjects.find(o => o.data.playable);
+        if (playableObject) {
+            const deltaRight = this._canvas.getWidth() - playableObject.data.coord.x;
+            const deltaLeft = 0 - playableObject.data.coord.x;
+            const toScrollDelta = this._canvas.getWidth() * 0.1;
+
+            console.log(`Delta ${deltaRight} ${deltaLeft} ${toScrollDelta}`);
+            if (Math.abs(deltaRight) < toScrollDelta) {
+                const moovOn = deltaRight - toScrollDelta - 10;
+                this.level.scroll(moovOn);
+                this.physicalObjects.forEach(obj => {
+                    obj.canvasObj.left += moovOn;
+                })
+            }
+
+            if (Math.abs(deltaLeft) < toScrollDelta) {
+                const moovOn = toScrollDelta - deltaLeft;
+                this.level.scroll(moovOn);
+            }
+
+            this._canvas.renderAll();
+        }
     }
 }
