@@ -25,20 +25,6 @@ export default class PhysicalObject implements PhysicalObjectData, GameObjectDat
         return this.width * this.height;
     }
 
-    getNextPoint():Point {
-        let nextX = this.speedX + this.dx >= 0 ?
-            this.coord.x + this.width :
-            this.coord.x;
-        nextX += this.speedX + this.dx;
-
-        let nextY = this.speedY + this.dy >= 0 ?
-            this.coord.y + this.height :
-            this.coord.y;
-        nextY += this.speedY + this.dy;
-
-        return new Point(nextX, nextY);
-    }
-
     playerSpeedX:number;
     playable:boolean;
     coord: Point;

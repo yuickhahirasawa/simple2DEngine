@@ -9,17 +9,18 @@ import PhysicalObjectFabric from "../src/fabrics/PhysicalObjectFabric";
 import Water from "../src/Materials/Water";
 
 const levelMatrix = [
-    [new Air(), new Air, new Air(), new Air(), new Air(), new Air()],
-    [new Air(), new Air, new Air(), new Air(), new Air(), new Air()],
-    // [new Water(), new Water, new Water(), new Water(), new Water(), new Water()],
-    [new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Air()]
+    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air, new Air(), new Ground(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Air(), new Air(), new Air()]
 ];
 
 const canvas = new fabric.StaticCanvas("canvas");
 const level1 = new Level(levelMatrix, canvas);
 
 const obj = PhysicalObjectFabric({
-    coord: new Point(100, 200),
+    coord: new Point(100, 320),
     speedX: 20,
     playable: true,
     width: 20,
@@ -32,7 +33,7 @@ world.addPhysicalObject(obj);
 
 window.onkeypress = (e:KeyboardEvent) => {
     if (e.key === ' ' && obj.speedY === 0) {
-        obj.speedY = -40;
+        obj.speedY = -20;
     }
 }
 

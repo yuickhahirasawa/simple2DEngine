@@ -6,8 +6,7 @@ export class Level {
     private readonly _canvas:fabric.StaticCanvas;
     private readonly _chunkSize:number;
     private _levelCanvasObjects:fabric.Rect[] = [];
-
-    private _currentLevelX:number;
+    private _deltaX = 0;
 
     get width():number {
         return this.levelMatrix[0].length * this._chunkSize;
@@ -24,13 +23,28 @@ export class Level {
         this._canvas = canvas;
         this.draw();
         this._chunkSize = Math.round(this._canvas.getHeight() / this.levelMatrix.length);
-        this._currentLevelX = 0;
     }
 
-    scroll(x:number):void {
-        for (let obj of this._levelCanvasObjects) {
-            obj.left += x;
+    scroll(x:number, direction:"left"|"right"):number {
+        console.log(direction, this._deltaX + x, this.width, this._canvas.getWidth(), this._chunkSize, this.levelMatrix[0].length);
+        if (direction === "right" && Math.abs(this._deltaX + x) > this.width - this._canvas.getWidth()) {
+            x = this.width - this._canvas.getWidth() - Math.abs(this._deltaX);
         }
+
+        if (direction === "left" && this._deltaX + x > 0) {
+            x = -this._deltaX;
+        }
+
+        this._deltaX += x;
+
+        if (x) {
+            this._levelCanvasObjects.forEach(obj => {
+                this._canvas.remove(obj);
+            });
+            this.draw();
+        }
+
+        return x;
     }
 
     draw() {
@@ -40,25 +54,18 @@ export class Level {
                     width: this._chunkSize,
                     height: this._chunkSize,
                     fill: this.levelMatrix[i][j].color,
-                    left: j * this._chunkSize,
+                    left: this._deltaX + j * this._chunkSize,
                     top: i * this._chunkSize
                 });
 
                 this._levelCanvasObjects.push(chunk);
                 this._canvas.add(chunk);
+                this._canvas.sendToBack(chunk);
             }
         }
     }
 
-    getMaterialRect(point:Point):{
-        material:Material,
-        rect:{
-            x:number,
-            y:number,
-            width:number,
-            height:number
-        }
-    } {
+    getMaterialRect(point:Point):MaterialRect {
         const i = Math.trunc(point.y / this._chunkSize);
         const j = Math.trunc(point.x / this._chunkSize);
 
@@ -71,5 +78,15 @@ export class Level {
                 height: this._chunkSize
             }
         };
+    }
+}
+
+export interface MaterialRect {
+    material:Material,
+    rect:{
+        x:number,
+        y:number,
+        width:number,
+        height:number
     }
 }
