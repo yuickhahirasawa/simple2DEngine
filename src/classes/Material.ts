@@ -31,6 +31,10 @@ export default abstract class Material {
         return this._color;
     }
 
+    get frictionK():number {
+        return this._frictionK;
+    }
+
     protected constructor(data:MaterialData) {
         this._state = data.state;
         this._ro = data.ro;

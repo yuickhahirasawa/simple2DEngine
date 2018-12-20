@@ -5,7 +5,7 @@ export default class Ground extends Material {
         super({
             state: MaterialState.SOLID,
             ro: 1,
-            frictionK: 0.2,
+            frictionK: 0.4,
             color: "brown"
         });
     }

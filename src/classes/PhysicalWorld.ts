@@ -1,8 +1,10 @@
-import {Level, MaterialRect} from "./Level";
+import {Level} from "./Level";
 import PhysicalObject from "./PhysicalObject";
 import {fabric} from "fabric";
 import {MaterialState} from "./Material";
 import Point from "./Point";
+
+const g = 1;
 
 export default class PhysicalWorld {
     public readonly level:Level;
@@ -40,64 +42,88 @@ export default class PhysicalWorld {
         this._canvas.add(canvasObj);
     }
 
+    private _nextHypotheticalPoint(po:PhysicalObject, co:fabric.Object) {
+        const yToCheck = po.speedY > 0 ?
+            co.top + po.speedY + co.height :
+            co.top + po.speedY;
+        const xToCheck = po.speedX > 0 ?
+            co.left + po.speedX + co.width :
+            co.left + po.speedX;
+
+
+    }
+
     private _recalculateWorld():void {
         setTimeout(() => {
             this.physicalObjects.forEach(obj => {
-                const nextVerticalPoints = this._getNextVerticalPoint(obj.data, obj.canvasObj);
-                const nextHorisontalPoints = this._getHorisontalPoint(obj.data, obj.canvasObj);
-                const materialRects = {
-                    topRight: this.level.getMaterialRect()
+                const nextHypotheticalVerticalPoints = this._getNextVerticalPoint(obj.data, obj.canvasObj);
+                const nextHypotheticalHorizontalPoints = this._getHorisontalPoint(obj.data, obj.canvasObj);
+                const horisontalMaterialPoints = {
+                    top: this.level.getMaterialRect(nextHypotheticalHorizontalPoints.top),
+                    bottom: this.level.getMaterialRect(nextHypotheticalHorizontalPoints.bottom)
+                };
+                const verticalMaterialPoints = {
+                    left: this.level.getMaterialRect(nextHypotheticalVerticalPoints.left),
+                    right: this.level.getMaterialRect(nextHypotheticalVerticalPoints.right)
+                };
+
+                const verticalInGas = verticalMaterialPoints.left.material.state === MaterialState.GASEOUS &&
+                    verticalMaterialPoints.right.material.state === MaterialState.GASEOUS;
+                const horisontalInGas = horisontalMaterialPoints.top.material.state === MaterialState.GASEOUS &&
+                    horisontalMaterialPoints.bottom.material.state === MaterialState.GASEOUS;
+                const verticalOnSolid = verticalMaterialPoints.left.material.state === MaterialState.SOLID ||
+                    verticalMaterialPoints.right.material.state === MaterialState.SOLID;
+                const horisontalOnSolid = horisontalMaterialPoints.top.material.state === MaterialState.SOLID ||
+                    horisontalMaterialPoints.bottom.material.state === MaterialState.SOLID;
+
+                /*console.log(`ObjInGas: ${objInGas}`);
+                console.log(`ObjToGasSide: ${objToGasSide}`);
+                console.log(`ObjOnSolid: ${objOnSolid}`);
+                console.log(`ObjToSolidSide: ${objToSolidSide}`);
+                console.log('----------------------------dddd')*/
+
+                if (horisontalOnSolid) {
+                    console.log('toSolid');
+                    obj.canvasObj.left = horisontalMaterialPoints.bottom.rect.x + obj.canvasObj.width * (obj.data.speedX > 0 ? 1 : 0);
+                    obj.data.speedX = 0;
                 }
 
-                if (obj.data.speedX > 0 && obj.data.speedY > 0) {
-                    materialRect = this.level.getMaterialRect()
-                }
-
-                if (materialRect.material.state === MaterialState.LIQUID) {
-                    obj.canvasObj.left += obj.data.speedX || obj.data.playerSpeedX;
-                    obj.canvasObj.top += obj.data.speedY;
-                }
-
-                if (materialRect.material.state === MaterialState.GASEOUS) {
-                    obj.canvasObj.left += obj.data.speedX || obj.data.playerSpeedX;
-                    obj.canvasObj.top += obj.data.speedY;
-                }
-
-                if (materialRect.material.state === MaterialState.SOLID) {
-                    if (obj.data.speedY > 0) {
-                        duration = ((materialRect.rect.y - obj.canvasObj.height) - obj.canvasObj.top) / obj.data.speedY;
-                        obj.canvasObj.top = materialRect.rect.y - obj.canvasObj.height;
-                        obj.canvasObj.left += obj.data.speedX * duration;
-                        console.log(((materialRect.rect.y - obj.canvasObj.height) - obj.data.coord.y), duration);
-                        duration = duration < 50 ? 50 : duration;
-                    } else {
-                        obj.canvasObj.left += obj.data.speedX || obj.data.playerSpeedX;
-                    }
-                }
-
-                if (materialRect.material.state === MaterialState.LIQUID) {
-                    obj.data.speedY -=
-                        obj.canvasObj.width * obj.canvasObj.height * materialRect.material.ro + 9;
-
-                    obj.data.speedX = obj.data.speedX * materialRect.material.ro;
-                }
-
-                if (materialRect.material.state === MaterialState.GASEOUS) {
-                    obj.data.speedY += 2 + obj.data.dy;
+                if (horisontalInGas) {
+                    console.log('to gas');
+                    obj.canvasObj.left += Math.max(obj.data.speedX, obj.data.playerSpeedX);
                     obj.data.speedX += obj.data.dx;
                 }
 
-                if (materialRect.material.state === MaterialState.SOLID) {
-                    obj.data.speedY = - Math.round(obj.data.speedY * .3);
+                if (verticalInGas) {
+                    obj.canvasObj.top += obj.data.speedY;
+                    obj.data.speedY += obj.data.dy + g;
+                }
 
-                    if (obj.data.speedY < 0 && Math.abs(obj.data.speedY) < obj.canvasObj.height * 0.1) {
-                        obj.data.speedY = 0;
-                        obj.data.speedX = 0;
+                if (verticalOnSolid) {
+                    if (obj.data.speedY > 0) {
+                        const newTop = verticalMaterialPoints.right.rect.y  + obj.canvasObj.height * (obj.data.speedY > 0 ? -1 : 1);
+                        const deltaTop = Math.abs(newTop - obj.canvasObj.top);
+                        const t = deltaTop / obj.data.speedY;
+                        obj.canvasObj.left += Math.trunc(obj.data.speedX * t);
+                        obj.canvasObj.top = newTop;
+                        obj.data.speedY = - Math.trunc(obj.data.speedY * 0.3);
+                        obj.data.dy = 0;
                     }
+
+                    if (Math.abs(obj.data.speedY) < 2 * g) {
+                        obj.data.speedY = 0;
+                        obj.data.dy = 0;
+                    }
+
+                    const solidMaterial = verticalMaterialPoints.left.material.state === MaterialState.SOLID ?
+                        verticalMaterialPoints.left.material :
+                        verticalMaterialPoints.right.material;
+
+                    obj.data.speedX = Math.trunc(obj.data.speedX * solidMaterial.frictionK);
                 }
             });
 
-            const playableObject = this.physicalObjects.find(o => o.data.playable);
+            /*const playableObject = this.physicalObjects.find(o => o.data.playable);
 
             if (playableObject) {
                 const deltaRight = this._canvas.getWidth() - playableObject.canvasObj.left;
@@ -121,22 +147,23 @@ export default class PhysicalWorld {
                 }
 
                 this._canvas.renderAll();
-            }
+            }*/
 
+            this._canvas.renderAll();
             requestAnimationFrame(() => {
                 this._recalculateWorld();
             });
-        }, 1000 / 60);
+        }, 1000 / 5);
     }
 
     private _getHorisontalPoint(po:PhysicalObject, co:fabric.Object):{top:Point, bottom:Point} {
-        const topY = co.top + po.speedY + po.dy;
-        const bottomY = co.top + co.height + po.speedY + po.dy;
+        const topY = co.top + po.speedY + 1;
+        const bottomY = co.top + co.height + po.speedY - 1;
 
-        let x = po.speedX + po.dx >= 0 ?
-            co.left + co.width :
-            co.left;
-        x += po.speedX + po.dx;
+        let x = po.speedX >= 0 ?
+            co.left + co.width + 1 :
+            co.left - 1;
+        x += po.speedX;
 
         return {
             top: new Point(x, topY),
@@ -145,13 +172,13 @@ export default class PhysicalWorld {
     }
 
     private _getNextVerticalPoint(po:PhysicalObject, co:fabric.Object):{left:Point, right:Point} {
-        const leftX = co.left + po.speedX + po.dx;
-        const rightX = co.left + co.width + po.speedX + po.dx;
+        const leftX = co.left + po.speedX + 1;
+        const rightX = co.left + co.width + po.speedX - 1;
 
-        let y = po.speedY + po.dy >= 0 ?
-            co.top + co.height :
-            co.top;
-        y += po.speedY + po.dy;
+        let y = po.speedY >= 0 ?
+            co.top + co.height + 1 :
+            co.top - 1;
+        y += po.speedY;
 
         return {
             left: new Point(leftX, y),

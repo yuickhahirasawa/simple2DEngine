@@ -9,10 +9,10 @@ import PhysicalObjectFabric from "../src/fabrics/PhysicalObjectFabric";
 import Water from "../src/Materials/Water";
 
 const levelMatrix = [
-    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
-    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
-    [new Air(), new Air, new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
-    [new Air(), new Air, new Air(), new Ground(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air(), new Air()],
+    [new Air(), new Ground(), new Air(), new Ground(), new Air(), new Air(), new Air(), new Air(), new Air()],
     [new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Ground(), new Air(), new Air(), new Air()]
 ];
 
@@ -20,8 +20,8 @@ const canvas = new fabric.StaticCanvas("canvas");
 const level1 = new Level(levelMatrix, canvas);
 
 const obj = PhysicalObjectFabric({
-    coord: new Point(100, 320),
-    speedX: 20,
+    coord: new Point(100, 250),
+    speedX: 5,
     playable: true,
     width: 20,
     height: 20
@@ -40,11 +40,11 @@ window.onkeypress = (e:KeyboardEvent) => {
 window.onkeydown = (e:KeyboardEvent) => {
     console.log(e.key);
     if (e.key === 'a') {
-        obj.playerSpeedX = -10;
+        obj.playerSpeedX = -5;
     }
 
     if (e.key === 'd') {
-        obj.playerSpeedX = 10;
+        obj.playerSpeedX = 5;
     }
 }
 
